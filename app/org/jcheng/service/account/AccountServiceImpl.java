@@ -17,6 +17,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.ServerAddress;
+import com.mongodb.WriteConcern;
 
 /**
  * @author jcheng
@@ -43,6 +44,7 @@ public class AccountServiceImpl implements AccountService {
 			Mongo m = new Mongo(addrs);
 			DB db = m.getDB(dbName);
 			accountCollection = db.getCollection(collectionName);
+			accountCollection.setWriteConcern(WriteConcern.SAFE);
 		} catch ( Exception e ) {
 			throw new RuntimeException(e);
 		}
@@ -54,8 +56,7 @@ public class AccountServiceImpl implements AccountService {
 	 */
 	@Override
 	public boolean isAccountActive(String username) {
-        BasicDBObject ref = new BasicDBObject();
-        ref.put(Fields.USERNAME, username);
+        BasicDBObject ref = new BasicDBObject(Fields.USERNAME, username);
         DBCursor cursor = accountCollection.find(ref).sort(new BasicDBObject(Fields._ID, 1));
         if ( cursor.hasNext() ) {
         	DBObject account = accountCollection.find(ref).sort(new BasicDBObject(Fields._ID, 1)).next();
@@ -70,11 +71,16 @@ public class AccountServiceImpl implements AccountService {
 	 */
 	@Override
 	public boolean createAccount(String username) {
-        BasicDBObject ref = new BasicDBObject();
-        ref.put(Fields.USERNAME, username);
-        ref.put(Fields.ACTIVE, Boolean.FALSE);
-        getAccountCollection().insert(ref);
-		return true;
+        BasicDBObject ref = new BasicDBObject(Fields.USERNAME, username);
+        DBCursor cursor = accountCollection.find(ref).sort(new BasicDBObject(Fields._ID, 1));
+        if ( !cursor.hasNext() ) {
+        	ref.put(Fields.ACTIVE, false);
+        	BasicDBObject create = new BasicDBObject(Fields.USERNAME, username);
+        	create.put(Fields.ACTIVE, false);
+        	getAccountCollection().update(new BasicDBObject(Fields.USERNAME, username), create, true, false);
+        	return true;
+        }
+		return false;
 	}
 	
 	/* (non-Javadoc)
@@ -91,6 +97,13 @@ public class AccountServiceImpl implements AccountService {
 		return false;
 	}
 
+	@Override
+	public boolean setAccountActive(String username, boolean active) {
+    	DBObject o = accountCollection.findAndModify(new BasicDBObject(Fields.USERNAME, username), 
+				 new BasicDBObject(Fields._SET, new BasicDBObject(Fields.ACTIVE, active)));
+        return true;
+	}
+	
 	/**
 	 * @return the accountCollection
 	 */
@@ -103,6 +116,12 @@ public class AccountServiceImpl implements AccountService {
 	 */
 	public void setAccountCollection(DBCollection accountCollection) {
 		this.accountCollection = accountCollection;
+	}
+
+	@Override
+	public boolean clearAll() {
+		getAccountCollection().remove(new BasicDBObject());
+		return true;
 	}
 
 }

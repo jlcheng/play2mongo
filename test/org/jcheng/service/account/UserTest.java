@@ -3,18 +3,10 @@
  */
 package org.jcheng.service.account;
 
-import java.util.Arrays;
-
 import org.jcheng.util.test.SetupUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.Mongo;
-import com.mongodb.ServerAddress;
 
 /**
  * @author jcheng
@@ -41,7 +33,12 @@ public class UserTest {
         users.insert(doc);
         */
         //accountService.createAccount("jcheng");
+		accountService.clearAll();
+		accountService.createAccount("jcheng");
         System.out.println("is Account active: " + accountService.isAccountActive("jcheng"));
+        accountService.setAccountActive("jcheng", true);
+        System.out.println("is Account active: " + accountService.isAccountActive("jcheng"));
+        
 	}
 	
 	@After
