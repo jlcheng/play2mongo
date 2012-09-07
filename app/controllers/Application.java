@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.index;
+import views.html.*;
 
 public class Application extends Controller {
 
@@ -24,7 +24,14 @@ public class Application extends Controller {
 		
 		model.company = "Huge";
 		
-		return ok(index.render(model));
+		return ok(login.render(model));
+	}
+	
+	public static Result login() {
+		Model model = new Model();
+		model.company = "Huge";
+		User user = new User();
+		return ok(main.render(model, user));
 	}
 
 	public static class Model {
@@ -38,6 +45,12 @@ public class Application extends Controller {
 		public final LinkedHashMap<String, String> sidebar2 = new LinkedHashMap<String, String>();
 		
 		public String company = "";
+	}
+	
+	public static class User {
+		
+		public String username;
+		public String password;
 	}
 
 }
