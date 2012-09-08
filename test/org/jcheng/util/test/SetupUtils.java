@@ -27,6 +27,7 @@ public final class SetupUtils {
 	public static void teardown() {
 		if ( appContext != null ) {
 			appContext.stop();
+			appContext.destroy();
 			appContext = null;
 			System.out.println("appContext stopped");
 		}

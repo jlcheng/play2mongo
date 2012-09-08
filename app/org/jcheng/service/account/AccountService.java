@@ -13,5 +13,7 @@ public interface AccountService {
 	boolean removeAccount(String username);
 	
 	boolean clearAll();
+	
+	long getCount();
 
 }

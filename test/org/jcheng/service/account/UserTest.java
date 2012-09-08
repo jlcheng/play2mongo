@@ -3,6 +3,8 @@
  */
 package org.jcheng.service.account;
 
+import junit.framework.Assert;
+
 import org.jcheng.util.test.SetupUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -14,6 +16,8 @@ import org.junit.Test;
  */
 public class UserTest {
 	
+	private static final String TEST_USER = "jcheng";
+	
 	private AccountService accountService = null;
 	
 	@Before
@@ -23,23 +27,25 @@ public class UserTest {
 	}
 	
 	@Test
-	public void testMe() throws Exception {
-		/*
-		Mongo m = new Mongo(Arrays.asList(new ServerAddress("localhost")));
-		DB db = m.getDB("test");
-		DBCollection users = db.getCollection("accounts");
-        BasicDBObject doc = new BasicDBObject();
-        doc.put("uname", "jcheng");
-        users.insert(doc);
-        */
-        //accountService.createAccount("jcheng");
+	public void testCreate() throws Exception {
 		accountService.clearAll();
-		accountService.createAccount("jcheng");
-        System.out.println("is Account active: " + accountService.isAccountActive("jcheng"));
-        accountService.setAccountActive("jcheng", true);
-        System.out.println("is Account active: " + accountService.isAccountActive("jcheng"));
-        
+		Assert.assertEquals(0, accountService.getCount());
+		
+		accountService.createAccount(TEST_USER);
+		Assert.assertEquals(1, accountService.getCount());
+		
+        accountService.setAccountActive(TEST_USER, true);
+		Assert.assertEquals(true, accountService.isAccountActive(TEST_USER));
 	}
+	
+	@Test
+	public void testSetAccountActive() throws Exception {
+		accountService.clearAll();
+		accountService.createAccount(TEST_USER);
+        accountService.setAccountActive(TEST_USER, true);
+		Assert.assertEquals(true, accountService.isAccountActive(TEST_USER));
+	}
+	
 	
 	@After
 	public void teardown() {

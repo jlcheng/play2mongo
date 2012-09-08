@@ -6,6 +6,7 @@ package org.jcheng.service.account;
 import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -32,23 +33,31 @@ public class AccountServiceImpl implements AccountService {
 	private String dbName;
 	@Value("#{'${accountDb.collectionName}'}")	
 	private String collectionName;
-	private DBCollection accountCollection; 
+	private DBCollection accountCollection;
+	private DB db;
+	private Mongo conn;
 	
 	@PostConstruct
 	public void setup() {
 		try {
 			ArrayList<ServerAddress> addrs = new ArrayList<ServerAddress>();
 			for (String serverAddress : serverAddresses.split(",") ) {
-				addrs.add(new ServerAddress(serverAddress));
+				addrs.add(new ServerAddress(serverAddress.trim()));
 			}
-			Mongo m = new Mongo(addrs);
-			DB db = m.getDB(dbName);
-			accountCollection = db.getCollection(collectionName);
-			accountCollection.setWriteConcern(WriteConcern.SAFE);
+			this.conn = new Mongo(addrs);
+			this.db = conn.getDB(dbName.trim());
+			accountCollection = db.getCollection(collectionName.trim());
+			accountCollection.setWriteConcern(WriteConcern.FSYNC_SAFE);
 		} catch ( Exception e ) {
 			throw new RuntimeException(e);
 		}
-
+	}
+	
+	@PreDestroy
+	public void tearDown() {
+		if ( this.conn != null ) {
+			conn.close();
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -57,9 +66,9 @@ public class AccountServiceImpl implements AccountService {
 	@Override
 	public boolean isAccountActive(String username) {
         BasicDBObject ref = new BasicDBObject(Fields.USERNAME, username);
-        DBCursor cursor = accountCollection.find(ref).sort(new BasicDBObject(Fields._ID, 1));
+        DBCursor cursor = accountCollection.find(ref).sort(Sort.BY_ID);
         if ( cursor.hasNext() ) {
-        	DBObject account = accountCollection.find(ref).sort(new BasicDBObject(Fields._ID, 1)).next();
+        	DBObject account = accountCollection.find(ref).sort(Sort.BY_ID).next();
         	Object active = account.get(Fields.ACTIVE);
         	return Boolean.TRUE.equals(active);
         }
@@ -71,10 +80,10 @@ public class AccountServiceImpl implements AccountService {
 	 */
 	@Override
 	public boolean createAccount(String username) {
-        BasicDBObject ref = new BasicDBObject(Fields.USERNAME, username);
-        DBCursor cursor = accountCollection.find(ref).sort(new BasicDBObject(Fields._ID, 1));
+        BasicDBObject q = new BasicDBObject(Fields.USERNAME, username);
+        DBCursor cursor = accountCollection.find(q).sort(Sort.BY_ID);
         if ( !cursor.hasNext() ) {
-        	ref.put(Fields.ACTIVE, false);
+        	q.put(Fields.ACTIVE, false);
         	BasicDBObject create = new BasicDBObject(Fields.USERNAME, username);
         	create.put(Fields.ACTIVE, false);
         	getAccountCollection().update(new BasicDBObject(Fields.USERNAME, username), create, true, false);
@@ -99,7 +108,7 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public boolean setAccountActive(String username, boolean active) {
-    	DBObject o = accountCollection.findAndModify(new BasicDBObject(Fields.USERNAME, username), 
+    	accountCollection.findAndModify(new BasicDBObject(Fields.USERNAME, username), 
 				 new BasicDBObject(Fields._SET, new BasicDBObject(Fields.ACTIVE, active)));
         return true;
 	}
@@ -122,6 +131,11 @@ public class AccountServiceImpl implements AccountService {
 	public boolean clearAll() {
 		getAccountCollection().remove(new BasicDBObject());
 		return true;
+	}
+
+	@Override
+	public long getCount() {
+		return getAccountCollection().count();
 	}
 
 }
