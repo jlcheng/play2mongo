@@ -1,17 +1,27 @@
 package org.jcheng.util.test;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractRefreshableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+
+/**
+ * Provides a global variable for looking up the Spring Application context for unit tests.
+ * 
+ * 
+ * @author jcheng
+ *
+ */
 public final class SetupUtils {
+	
+	private static final Logger logger = LoggerFactory.getLogger(SetupUtils.class);
 	
 	private static AbstractRefreshableApplicationContext appContext = null;
 	
-	private SetupUtils() {
-		
-	}
+	private SetupUtils() { }
 	
 	public static ApplicationContext getApplicationContext() {
 		return appContext;
@@ -20,7 +30,7 @@ public final class SetupUtils {
 	public static void setup() {
 		if ( appContext == null ) {
 			appContext = new ClassPathXmlApplicationContext("applicationContext.xml");
-			System.out.println("appContext started");			
+			logger.debug("appContext started");
 		}
 	}
 	
@@ -29,7 +39,7 @@ public final class SetupUtils {
 			appContext.stop();
 			appContext.destroy();
 			appContext = null;
-			System.out.println("appContext stopped");
+			logger.debug("appContext stopped");
 		}
 	}
 

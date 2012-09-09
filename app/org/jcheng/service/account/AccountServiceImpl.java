@@ -47,7 +47,7 @@ public class AccountServiceImpl implements AccountService {
 			this.conn = new Mongo(addrs);
 			this.db = conn.getDB(dbName.trim());
 			accountCollection = db.getCollection(collectionName.trim());
-			accountCollection.setWriteConcern(WriteConcern.FSYNC_SAFE);
+			accountCollection.setWriteConcern(WriteConcern.SAFE);
 		} catch ( Exception e ) {
 			throw new RuntimeException(e);
 		}
@@ -66,9 +66,9 @@ public class AccountServiceImpl implements AccountService {
 	@Override
 	public boolean isAccountActive(String username) {
         BasicDBObject ref = new BasicDBObject(Fields.USERNAME, username);
-        DBCursor cursor = accountCollection.find(ref).sort(Sort.BY_ID);
+        DBCursor cursor = getAccountCollection().find(ref).sort(Sort.BY_ID);
         if ( cursor.hasNext() ) {
-        	DBObject account = accountCollection.find(ref).sort(Sort.BY_ID).next();
+        	DBObject account = getAccountCollection().find(ref).sort(Sort.BY_ID).next();
         	Object active = account.get(Fields.ACTIVE);
         	return Boolean.TRUE.equals(active);
         }
@@ -112,6 +112,18 @@ public class AccountServiceImpl implements AccountService {
 				 new BasicDBObject(Fields._SET, new BasicDBObject(Fields.ACTIVE, active)));
         return true;
 	}
+
+	@Override
+	public boolean clearAll() {
+		getAccountCollection().remove(new BasicDBObject());
+		return true;
+	}
+
+	@Override
+	public long getCount() {
+		return getAccountCollection().count();
+	}
+
 	
 	/**
 	 * @return the accountCollection
@@ -126,16 +138,4 @@ public class AccountServiceImpl implements AccountService {
 	public void setAccountCollection(DBCollection accountCollection) {
 		this.accountCollection = accountCollection;
 	}
-
-	@Override
-	public boolean clearAll() {
-		getAccountCollection().remove(new BasicDBObject());
-		return true;
-	}
-
-	@Override
-	public long getCount() {
-		return getAccountCollection().count();
-	}
-
 }
