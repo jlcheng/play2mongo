@@ -46,6 +46,11 @@ public class UserTest {
 		Assert.assertEquals(true, accountService.isAccountActive(TEST_USER));
 	}
 	
+	@Test
+	public void testLoginAuthentication() throws Exception {
+		accountService.isLoginValid(TEST_USER, "password");
+	}
+	
 	
 	@After
 	public void teardown() {

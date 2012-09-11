@@ -7,8 +7,34 @@ public interface AccountService {
 	boolean createAccount(String username);
 	
 	boolean setAccountActive(String username, boolean active);
-
-	boolean isLoginValid(String username, String password);
+	
+	/**
+	 * Stores the password hash that has been generated using the specified algorithm.
+	 * 
+	 * @param username
+	 * @param pwHash
+	 * @param pwHashAlgo
+	 * @return
+	 */
+	boolean setAccountLogin(String username, String pwHash, String pwHashAlgo);
+	
+	/**
+	 * Validates user login.
+	 * 
+	 * It is assumed that the caller of the API will create a password hash (`pwHash`) using the algorithm 
+	 * specified by an password algorithm. The API simply compares the provided the pwHash against what's
+	 * stored in the datastore.
+	 * 
+	 * It is possible that the caller is using a brand new hash algo that is different thant he one used to
+	 * generate his last known pwHash. If so, his call simply return false, even if the pwHash is correctly 
+	 * generated from the new algorithm. This means, if hash algo has been changed on a system level,
+	 * a user must first reset his password before this API will work again. 
+	 * 
+	 * @param username
+	 * @param pwHash
+	 * @return
+	 */
+	boolean isLoginValid(String username, String pwHash);
 	
 	boolean removeAccount(String username);
 	

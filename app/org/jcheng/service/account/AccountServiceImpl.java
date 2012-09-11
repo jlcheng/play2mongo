@@ -8,10 +8,14 @@ import java.util.ArrayList;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.jcheng.util.mongo.ImmutableDBObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -41,13 +45,14 @@ public class AccountServiceImpl implements AccountService {
 	public void setup() {
 		try {
 			ArrayList<ServerAddress> addrs = new ArrayList<ServerAddress>();
-			for (String serverAddress : serverAddresses.split(",") ) {
-				addrs.add(new ServerAddress(serverAddress.trim()));
+			Splitter s = Splitter.on(',').trimResults().omitEmptyStrings();
+			for (String serverAddress : s.split(serverAddresses) ) {
+				addrs.add(new ServerAddress(serverAddress));
 			}
 			this.conn = new Mongo(addrs);
-			this.db = conn.getDB(dbName.trim());
-			accountCollection = db.getCollection(collectionName.trim());
-			accountCollection.setWriteConcern(WriteConcern.SAFE);
+			this.db = conn.getDB(Strings.nullToEmpty(dbName).trim());
+			this.accountCollection = db.getCollection(Strings.nullToEmpty(collectionName).trim());
+			this.accountCollection.setWriteConcern(WriteConcern.SAFE);
 		} catch ( Exception e ) {
 			throw new RuntimeException(e);
 		}
@@ -65,10 +70,10 @@ public class AccountServiceImpl implements AccountService {
 	 */
 	@Override
 	public boolean isAccountActive(String username) {
-        BasicDBObject ref = new BasicDBObject(Fields.USERNAME, username);
-        DBCursor cursor = getAccountCollection().find(ref).sort(Sort.BY_ID);
+		ImmutableDBObject usernameQuery = new ImmutableDBObject(Fields.USERNAME, username);
+        DBCursor cursor = getAccountCollection().find(usernameQuery).sort(Sort.BY_ID);
         if ( cursor.hasNext() ) {
-        	DBObject account = getAccountCollection().find(ref).sort(Sort.BY_ID).next();
+        	DBObject account = getAccountCollection().find(usernameQuery).sort(Sort.BY_ID).next();
         	Object active = account.get(Fields.ACTIVE);
         	return Boolean.TRUE.equals(active);
         }
@@ -80,29 +85,16 @@ public class AccountServiceImpl implements AccountService {
 	 */
 	@Override
 	public boolean createAccount(String username) {
-        BasicDBObject q = new BasicDBObject(Fields.USERNAME, username);
-        DBCursor cursor = accountCollection.find(q).sort(Sort.BY_ID);
+		ImmutableDBObject usernameQuery = new ImmutableDBObject(Fields.USERNAME, username);
+        DBCursor cursor = getAccountCollection().find(usernameQuery).sort(Sort.BY_ID);
         if ( !cursor.hasNext() ) {
-        	q.put(Fields.ACTIVE, false);
-        	BasicDBObject create = new BasicDBObject(Fields.USERNAME, username);
-        	create.put(Fields.ACTIVE, false);
-        	getAccountCollection().update(new BasicDBObject(Fields.USERNAME, username), create, true, false);
+        	DBObject newAccount = BasicDBObjectBuilder
+			        			.start(Fields.USERNAME, username)
+			        			.append(Fields.ACTIVE, false)
+			        			.get();
+        	getAccountCollection().update(usernameQuery, newAccount, true, false);
         	return true;
         }
-		return false;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.jcheng.service.account.AccountService#isLoginValid(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public boolean isLoginValid(String username, String password) {
-		return false;
-	}
-
-	@Override
-	public boolean removeAccount(String username) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -124,7 +116,31 @@ public class AccountServiceImpl implements AccountService {
 		return getAccountCollection().count();
 	}
 
-	
+
+	@Override
+	public boolean setAccountLogin(String username, String pwHash,
+			String pwHashAlgo) {
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jcheng.service.account.AccountService#isLoginValid(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public boolean isLoginValid(String username, String pwHash) {
+        DBObject q = BasicDBObjectBuilder
+        				.start(Fields.USERNAME, username)
+        				.add(Fields.PASSWORD_HASH, pwHash).get();
+        DBCursor cursor = getAccountCollection().find(q).sort(Sort.BY_ID);
+        return cursor.hasNext();
+	}
+
+	@Override
+	public boolean removeAccount(String username) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	/**
 	 * @return the accountCollection
 	 */
@@ -138,4 +154,5 @@ public class AccountServiceImpl implements AccountService {
 	public void setAccountCollection(DBCollection accountCollection) {
 		this.accountCollection = accountCollection;
 	}
+
 }
