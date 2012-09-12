@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.jcheng.service.ServiceUtils;
 import org.jcheng.util.mongo.ImmutableDBObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.ServerAddress;
@@ -70,10 +70,10 @@ public class AccountServiceImpl implements AccountService {
 	 */
 	@Override
 	public boolean isAccountActive(String username) {
-		ImmutableDBObject usernameQuery = new ImmutableDBObject(Fields.USERNAME, username);
-        DBCursor cursor = getAccountCollection().find(usernameQuery).sort(Sort.BY_ID);
-        if ( cursor.hasNext() ) {
-        	DBObject account = getAccountCollection().find(usernameQuery).sort(Sort.BY_ID).next();
+		ImmutableDBObject q = new ImmutableDBObject(Fields.USERNAME, username);
+		DBObject fields = Fields.O_ACTIVE;
+    	DBObject account = getAccountCollection().findOne(q, fields);
+        if ( account != null ) {
         	Object active = account.get(Fields.ACTIVE);
         	return Boolean.TRUE.equals(active);
         }
@@ -85,14 +85,14 @@ public class AccountServiceImpl implements AccountService {
 	 */
 	@Override
 	public boolean createAccount(String username) {
-		ImmutableDBObject usernameQuery = new ImmutableDBObject(Fields.USERNAME, username);
-        DBCursor cursor = getAccountCollection().find(usernameQuery).sort(Sort.BY_ID);
-        if ( !cursor.hasNext() ) {
+		ImmutableDBObject q = new ImmutableDBObject(Fields.USERNAME, username);
+		DBObject dbo = getAccountCollection().findOne(q, Fields.O_NATIVE_ID);
+        if ( dbo == null ) {
         	DBObject newAccount = BasicDBObjectBuilder
 			        			.start(Fields.USERNAME, username)
 			        			.append(Fields.ACTIVE, false)
 			        			.get();
-        	getAccountCollection().update(usernameQuery, newAccount, true, false);
+        	getAccountCollection().update(q, newAccount, true, false);
         	return true;
         }
 		return false;
@@ -131,13 +131,12 @@ public class AccountServiceImpl implements AccountService {
         DBObject q = BasicDBObjectBuilder
         				.start(Fields.USERNAME, username)
         				.add(Fields.PASSWORD_HASH, pwHash).get();
-        DBCursor cursor = getAccountCollection().find(q).sort(Sort.BY_ID);
-        return cursor.hasNext();
+        DBObject retval = getAccountCollection().findOne(q);
+        return retval == null;
 	}
 
 	@Override
 	public boolean removeAccount(String username) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -153,6 +152,20 @@ public class AccountServiceImpl implements AccountService {
 	 */
 	public void setAccountCollection(DBCollection accountCollection) {
 		this.accountCollection = accountCollection;
+	}
+
+	@Override
+	public String getPasswordHashAlgo(String username) {
+        DBObject q = new BasicDBObject(Fields.USERNAME, username);
+        DBObject dbo = getAccountCollection().findOne(q, Fields.O_PASSWORD_HASH_ALGO);
+        String retval = null;
+        if ( dbo != null ) {
+        	retval = String.valueOf(dbo.get(Fields.PASSWORD_HASH_ALGO));
+        }
+        if ( Strings.isNullOrEmpty(retval) ) {
+        	retval = ServiceUtils.SHA_256;
+        }
+		return retval;
 	}
 
 }

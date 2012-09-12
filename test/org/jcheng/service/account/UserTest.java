@@ -35,7 +35,7 @@ public class UserTest {
 		Assert.assertEquals(1, accountService.getCount());
 		
         accountService.setAccountActive(TEST_USER, true);
-		Assert.assertEquals(true, accountService.isAccountActive(TEST_USER));
+		Assert.assertEquals(true, accountService.isAccountActive(TEST_USER));	
 	}
 	
 	@Test
@@ -48,7 +48,8 @@ public class UserTest {
 	
 	@Test
 	public void testLoginAuthentication() throws Exception {
-		accountService.isLoginValid(TEST_USER, "password");
+		//accountService.isLoginValid(TEST_USER, "password");
+		accountService.getPasswordHashAlgo(TEST_USER);
 	}
 	
 	

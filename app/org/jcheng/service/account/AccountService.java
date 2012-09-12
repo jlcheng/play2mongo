@@ -36,6 +36,17 @@ public interface AccountService {
 	 */
 	boolean isLoginValid(String username, String pwHash);
 	
+	/**
+	 * Gets the algorithm used to hash the account password.
+	 * 
+	 * The returned value is the algorithm used in the last 'setAccountLogin()' call. If the account has no
+	 * login, then a default algorithm name will be returned. 
+	 * 
+	 * @param username Username of the account
+	 * @return Algorithm name, never returns `null`.
+	 */
+	String getPasswordHashAlgo(String username);
+	
 	boolean removeAccount(String username);
 	
 	boolean clearAll();
