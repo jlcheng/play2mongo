@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.jcheng.service.account;
 
 import junit.framework.Assert;
@@ -11,10 +8,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
+ * Unit test for {@link AccountServiceImpl}.
+ * 
  * @author jcheng
  *
  */
-public class UserTest {
+public class AccountTest {
 	
 	private static final String TEST_USER = "jcheng";
 	private static final String TEST_PASS = "password";
