@@ -17,6 +17,8 @@ import org.junit.Test;
 public class UserTest {
 	
 	private static final String TEST_USER = "jcheng";
+	private static final String TEST_PASS = "password";
+	private static final String TEST_PASS_ALGO = "indentity";
 	
 	private AccountService accountService = null;
 	
@@ -48,10 +50,11 @@ public class UserTest {
 	
 	@Test
 	public void testLoginAuthentication() throws Exception {
-		//accountService.isLoginValid(TEST_USER, "password");
-		accountService.getPasswordHashAlgo(TEST_USER);
+		accountService.clearAll();
+		accountService.createAccount(TEST_USER);
+		accountService.setAccountLogin(TEST_USER, TEST_PASS, TEST_PASS_ALGO);
+		Assert.assertEquals(true, accountService.isLoginValid(TEST_USER, TEST_PASS));		
 	}
-	
 	
 	@After
 	public void teardown() {

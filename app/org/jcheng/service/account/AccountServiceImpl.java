@@ -100,8 +100,9 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public boolean setAccountActive(String username, boolean active) {
-    	accountCollection.findAndModify(new BasicDBObject(Fields.USERNAME, username), 
-				 new BasicDBObject(Fields._SET, new BasicDBObject(Fields.ACTIVE, active)));
+		ImmutableDBObject query = new ImmutableDBObject(Fields.USERNAME, username);
+		DBObject fields = new ImmutableDBObject(Fields.ACTIVE, active);
+    	accountCollection.findAndModify(query, new BasicDBObject(Fields._SET, fields));		
         return true;
 	}
 
@@ -120,6 +121,12 @@ public class AccountServiceImpl implements AccountService {
 	@Override
 	public boolean setAccountLogin(String username, String pwHash,
 			String pwHashAlgo) {
+		ImmutableDBObject query = new ImmutableDBObject(Fields.USERNAME, username);
+		DBObject fields = BasicDBObjectBuilder
+							.start(Fields.PASSWORD_HASH, pwHash)
+							.append(Fields.PASSWORD_HASH_ALGO, pwHashAlgo)
+						  .get();
+    	accountCollection.findAndModify(query, new BasicDBObject(Fields._SET, fields));		
 		return false;
 	}
 
@@ -132,7 +139,7 @@ public class AccountServiceImpl implements AccountService {
         				.start(Fields.USERNAME, username)
         				.add(Fields.PASSWORD_HASH, pwHash).get();
         DBObject retval = getAccountCollection().findOne(q);
-        return retval == null;
+        return retval != null;
 	}
 
 	@Override
