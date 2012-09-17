@@ -25,6 +25,8 @@ import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
 
 /**
+ * Implementation of {@link AccountService} using a MongoDB Backend.
+ * 
  * @author jcheng
  *
  */
@@ -84,13 +86,15 @@ public class AccountServiceImpl implements AccountService {
 	 * @see org.jcheng.service.account.AccountService#createAccount(java.lang.String)
 	 */
 	@Override
-	public boolean createAccount(String username) {
+	public boolean createAccount(String username, String pwHash, String pwHashAlgo) {
 		ImmutableDBObject q = new ImmutableDBObject(Fields.USERNAME, username);
 		DBObject dbo = getAccountCollection().findOne(q, Fields.O_NATIVE_ID);
         if ( dbo == null ) {
         	DBObject newAccount = BasicDBObjectBuilder
 			        			.start(Fields.USERNAME, username)
 			        			.append(Fields.ACTIVE, false)
+			        			.append(Fields.PASSWORD_HASH, pwHash)
+			        			.append(Fields.PASSWORD_HASH_ALGO, pwHashAlgo)
 			        			.get();
         	getAccountCollection().update(q, newAccount, true, false);
         	return true;

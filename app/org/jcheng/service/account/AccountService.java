@@ -1,15 +1,35 @@
 package org.jcheng.service.account;
 
+/**
+ * An API to manage user accounts with a distributed datastore.
+ * 
+ * <p>Assumes the account backend is a distributed, non-transactional, quorum-write, last write wins datatstore. 
+ * A key corollary of the assumption is that the datastore is not consistent and relies on the application to keep 
+ * consistency. 
+ * </p>
+ * 
+ * 
+ * @author jcheng
+ *
+ */
 public interface AccountService {
 
 	boolean isAccountActive(String username);
 
-	boolean createAccount(String username);
+	/**
+	 * Creates an account.
+	 * 
+	 * @param username The account name.
+	 * @param pwHash The hashed password, may be null or empty.
+	 * @param pwHashAlgo The password hash algo, may be null or empty.
+	 * @return
+	 */
+	boolean createAccount(String username, String pwHash, String pwHashAlgo);
 	
 	boolean setAccountActive(String username, boolean active);
 	
 	/**
-	 * Stores the password hash that has been generated using the specified algorithm.
+	 * Stores the password hash that has  been generated using the specified algorithm.
 	 * 
 	 * @param username
 	 * @param pwHash
