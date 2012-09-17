@@ -13,12 +13,14 @@ import org.bson.BSONObject;
 import com.mongodb.DBObject;
 
 /**
- * Immutable DBObject useful as constants or shared references.
+ * Immutable version of {@link DBObject}.
+ * 
+ * This implementation is useful as constant value or for sharing {@link DBObject} across multiple threads. 
  * 
  * @author jcheng
  *
  */
-public class ImmutableDBObject implements DBObject {
+public final class ImmutableDBObject implements DBObject {
 	
 	private final Map<String, Object> data;
 	
