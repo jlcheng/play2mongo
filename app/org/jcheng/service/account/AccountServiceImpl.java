@@ -148,7 +148,9 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public boolean removeAccount(String username) {
-		return false;
+		ImmutableDBObject q = new ImmutableDBObject(Fields.USERNAME, username);
+		getAccountCollection().remove(q);
+		return true;
 	}
 
 	/**
