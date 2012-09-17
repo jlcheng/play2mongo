@@ -29,7 +29,7 @@ public class AccountTest {
 	
 	@Test
 	public void testCreate() throws Exception {
-		accountService.clearAll();
+		accountService.removeAll();
 		Assert.assertEquals(0, accountService.getCount());
 		
 		accountService.createAccount(TEST_USER, TEST_PASS, TEST_PASS_ALGO);
@@ -41,7 +41,7 @@ public class AccountTest {
 	
 	@Test
 	public void testSetAccountActive() throws Exception {
-		accountService.clearAll();
+		accountService.removeAll();
 		accountService.createAccount(TEST_USER, TEST_PASS, TEST_PASS_ALGO);
         accountService.setAccountActive(TEST_USER, true);
 		Assert.assertEquals(true, accountService.isAccountActive(TEST_USER));
@@ -49,7 +49,7 @@ public class AccountTest {
 	
 	@Test
 	public void testLoginAuthentication() throws Exception {
-		accountService.clearAll();
+		accountService.removeAll();
 		accountService.createAccount(TEST_USER, TEST_PASS, TEST_PASS_ALGO);
 		accountService.setAccountLogin(TEST_USER, TEST_PASS, TEST_PASS_ALGO);
 		Assert.assertEquals(true, accountService.isLoginValid(TEST_USER, TEST_PASS));		

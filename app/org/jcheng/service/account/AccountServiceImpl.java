@@ -111,7 +111,7 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	@Override
-	public boolean clearAll() {
+	public boolean removeAll() {
 		getAccountCollection().remove(new BasicDBObject());
 		return true;
 	}

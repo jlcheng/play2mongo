@@ -1,11 +1,11 @@
 package org.jcheng.service.account;
 
 /**
- * An API to manage user accounts with a distributed datastore.
+ * An API to manage user accounts with a distributed data store.
  * 
- * <p>Assumes the account backend is a distributed, non-transactional, quorum-write, last write wins datatstore. 
- * A key corollary of the assumption is that the datastore is not consistent and relies on the application to keep 
- * consistency. 
+ * <p>This API assumes the backend is a distributed, non-transactional, quorum-write, last write wins data store.
+ * There are some challenges associated with these assumptions. For one, it is non-trivial to completely remove an
+ * Account and all related data objects with one update (updates to multiple objects are non-transactional).  
  * </p>
  * 
  * 
@@ -14,7 +14,22 @@ package org.jcheng.service.account;
  */
 public interface AccountService {
 
+	/**
+	 * Is an account active?
+	 * 
+	 * @param username The account name.
+	 * @return
+	 */
 	boolean isAccountActive(String username);
+	
+	/**
+	 * Sets whether an account is active or not.
+	 * 
+	 * @param username The account name.
+	 * @param active The active flag.
+	 * @return
+	 */
+	boolean setAccountActive(String username, boolean active);	
 
 	/**
 	 * Creates an account.
@@ -25,15 +40,13 @@ public interface AccountService {
 	 * @return
 	 */
 	boolean createAccount(String username, String pwHash, String pwHashAlgo);
-	
-	boolean setAccountActive(String username, boolean active);
-	
+		
 	/**
 	 * Stores the password hash that has  been generated using the specified algorithm.
 	 * 
-	 * @param username
-	 * @param pwHash
-	 * @param pwHashAlgo
+	 * @param username The account name.
+	 * @param pwHash The hashed password, may be null or empty.
+	 * @param pwHashAlgo The password hash algo, may be null or empty.
 	 * @return
 	 */
 	boolean setAccountLogin(String username, String pwHash, String pwHashAlgo);
@@ -50,8 +63,8 @@ public interface AccountService {
 	 * generated from the new algorithm. This means, if hash algo has been changed on a system level,
 	 * a user must first reset his password before this API will work again. 
 	 * 
-	 * @param username
-	 * @param pwHash
+	 * @param username The account name.
+	 * @param pwHash The hashed password, may be null or empty.
 	 * @return
 	 */
 	boolean isLoginValid(String username, String pwHash);
@@ -62,15 +75,39 @@ public interface AccountService {
 	 * The returned value is the algorithm used in the last 'setAccountLogin()' call. If the account has no
 	 * login, then a default algorithm name will be returned. 
 	 * 
-	 * @param username Username of the account
+	 * @param username The account name.
 	 * @return Algorithm name, never returns `null`.
 	 */
 	String getPasswordHashAlgo(String username);
 	
+	/**
+	 * Removes an account from the data store.
+	 * 
+	 * <p>This call only removes the base account object. Data objects related to an account may have to be 
+	 * removed separately.</p>
+	 * 
+	 * @param username The account name.
+	 * @return
+	 */
 	boolean removeAccount(String username);
 	
-	boolean clearAll();
 	
+	/**
+	 * Removes all accounts from the data store.
+	 * 
+	 * <p>This call may not remove all accounts when the data store is sharded.</p>
+	 * 
+	 * @return
+	 */
+	boolean removeAll();
+
+	/**
+	 * Gets the number of accounts in the data store (including inactive accounts).
+	 *  
+	 * <p>This returned value will be an estimate when the data store is sharded.</p>
+	 *  
+	 * @return
+	 */
 	long getCount();
 
 }
