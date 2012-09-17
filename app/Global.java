@@ -11,8 +11,6 @@ import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import demo.Person;
-
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
@@ -46,10 +44,6 @@ public class Global extends GlobalSettings {
 
 		try {
 			GlobalContext.appContext = new ClassPathXmlApplicationContext("applicationContext.xml");
-			Person p = GlobalContext.appContext.getBean(Person.class);
-			if ( p == null || p.getFavoriteAnimal() == null ) {
-				throw new RuntimeException("Spring not initalized as expected.");
-			}
 			Logger.info("Spring applicationContext started.");
 		} catch ( Exception e ) {
 			Logger.error(e.getMessage());
