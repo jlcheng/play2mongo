@@ -4,17 +4,26 @@
 package org.jcheng.service.account;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.jcheng.domain.Account;
+import org.jcheng.repository.AccountRepository;
 import org.jcheng.service.ServiceUtils;
 import org.jcheng.util.mongo.ImmutableDBObject;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
@@ -33,6 +42,9 @@ import com.mongodb.WriteConcern;
 @Component
 public class AccountServiceImpl implements AccountService {
 	
+	
+	org.slf4j.Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class); 
+	
 	@Value("#{'${accountDb.hostName}'}")	
 	private String serverAddresses;
 	@Value("#{'${accountDb.dbName}'}")		
@@ -42,6 +54,11 @@ public class AccountServiceImpl implements AccountService {
 	private DBCollection accountCollection;
 	private DB db;
 	private Mongo conn;
+	
+	@Autowired
+	private AccountRepository accountRepository;
+	@Autowired
+	private MongoTemplate mongoTemplate;
 	
 	@PostConstruct
 	public void setup() {
@@ -72,14 +89,8 @@ public class AccountServiceImpl implements AccountService {
 	 */
 	@Override
 	public boolean isAccountActive(String username) {
-		ImmutableDBObject q = new ImmutableDBObject(Fields.USERNAME, username);
-		DBObject fields = Fields.O_ACTIVE;
-    	DBObject account = getAccountCollection().findOne(q, fields);
-        if ( account != null ) {
-        	Object active = account.get(Fields.ACTIVE);
-        	return Boolean.TRUE.equals(active);
-        }
-        return false;
+		List<Account> acts = accountRepository.findByUsernameAndActive(username, true);
+		return !Iterables.isEmpty(acts) && acts.get(0).isActive(); 
 	}
 	
 	/* (non-Javadoc)
@@ -130,7 +141,7 @@ public class AccountServiceImpl implements AccountService {
 							.start(Fields.PASSWORD_HASH, pwHash)
 							.append(Fields.PASSWORD_HASH_ALGO, pwHashAlgo)
 						  .get();
-    	accountCollection.findAndModify(query, new BasicDBObject(Fields._SET, fields));		
+    	accountCollection.findAndModify(query, new BasicDBObject(Fields._SET, fields));
 		return false;
 	}
 
@@ -148,8 +159,7 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public boolean removeAccount(String username) {
-		ImmutableDBObject q = new ImmutableDBObject(Fields.USERNAME, username);
-		getAccountCollection().remove(q);
+		getMongoTemplate().remove(new Query(Criteria.where(Fields.USERNAME).is(username)), Account.class);
 		return true;
 	}
 
@@ -179,6 +189,31 @@ public class AccountServiceImpl implements AccountService {
         	retval = ServiceUtils.SHA_256;
         }
 		return retval;
+	}
+
+	public AccountRepository getAccountRepository() {
+		return accountRepository;
+	}
+
+	public void setAccountRepository(AccountRepository accountRepository) {
+		this.accountRepository = accountRepository;
+	}
+
+	public MongoTemplate getMongoTemplate() {
+		return mongoTemplate;
+	}
+
+	public void setMongoTemplate(MongoTemplate mongoTemplate) {
+		this.mongoTemplate = mongoTemplate;
+	}
+
+	@Override
+	public Account getAccount(String username) {
+		List<Account> accounts = accountRepository.findByUsername(username);
+		if ( !Iterables.isEmpty(accounts) ) {
+			return accounts.get(0);
+		}
+		return null;
 	}
 
 }

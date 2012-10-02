@@ -1,5 +1,7 @@
 package org.jcheng.service.account;
 
+import org.jcheng.domain.Account;
+
 /**
  * An API to manage user accounts with a distributed data store.
  * 
@@ -9,6 +11,10 @@ package org.jcheng.service.account;
  * </p>
  * 
  * 
+ * @author jcheng
+ *
+ */
+/**
  * @author jcheng
  *
  */
@@ -109,5 +115,16 @@ public interface AccountService {
 	 * @return
 	 */
 	long getCount();
+	
+	
+	
+	/**
+	 * Gets account by username.
+	 * 
+	 * @param username
+	 * 
+	 * @return An account object or null.
+	 */
+	Account getAccount(String username);
 
 }
