@@ -54,10 +54,7 @@ public class AccountTest {
 		accountService.setAccountLogin(TEST_USER, TEST_PASS, TEST_PASS_ALGO);
 		Assert.assertEquals(true, accountService.isLoginValid(TEST_USER, TEST_PASS));
 	}
-	
-	@Test
-	
-	
+
 	@After
 	public void teardown() {
 		SetupUtils.teardown();

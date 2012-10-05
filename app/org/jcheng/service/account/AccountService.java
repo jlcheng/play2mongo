@@ -1,6 +1,5 @@
 package org.jcheng.service.account;
 
-import org.jcheng.domain.Account;
 
 /**
  * An API to manage user accounts with a distributed data store.
@@ -14,19 +13,29 @@ import org.jcheng.domain.Account;
  * @author jcheng
  *
  */
-/**
- * @author jcheng
- *
- */
 public interface AccountService {
 
 	/**
-	 * Is an account active?
+	 * Checks that an account exists AND is active.
 	 * 
 	 * @param username The account name.
 	 * @return
 	 */
 	boolean isAccountActive(String username);
+	
+	
+	/**
+	 * Checks that an account (possibly inactive account) exists.
+	 * 
+	 * Checks to see if account exists. This will return {@code true} even if the account has 
+	 * {@code active = false} set. 
+	 * 
+	 * @see #isAccountActive(String)
+	 * @param username The account name.
+	 * @return
+	 */
+	boolean isAccountCreated(String username);
+	
 	
 	/**
 	 * Sets whether an account is active or not.
@@ -35,7 +44,7 @@ public interface AccountService {
 	 * @param active The active flag.
 	 * @return
 	 */
-	boolean setAccountActive(String username, boolean active);	
+	void setAccountActive(String username, boolean active);	
 
 	/**
 	 * Creates an account.
@@ -43,7 +52,7 @@ public interface AccountService {
 	 * @param username The account name.
 	 * @param pwHash The hashed password, may be null or empty.
 	 * @param pwHashAlgo The password hash algo, may be null or empty.
-	 * @return
+	 * @return <em>true</em> if the account was successfully created.
 	 */
 	boolean createAccount(String username, String pwHash, String pwHashAlgo);
 		
@@ -55,19 +64,19 @@ public interface AccountService {
 	 * @param pwHashAlgo The password hash algo, may be null or empty.
 	 * @return
 	 */
-	boolean setAccountLogin(String username, String pwHash, String pwHashAlgo);
+	void setAccountLogin(String username, String pwHash, String pwHashAlgo);
 	
 	/**
 	 * Validates user login.
 	 * 
-	 * It is assumed that the caller of the API will create a password hash (`pwHash`) using the algorithm 
+	 * <p>It is assumed that the caller of the API will create a password hash (`pwHash`) using the algorithm 
 	 * specified by an password algorithm. The API simply compares the provided the pwHash against what's
-	 * stored in the datastore.
+	 * stored in the datastore.</p>
 	 * 
-	 * It is possible that the caller is using a brand new hash algo that is different thant he one used to
+	 * <p>It is possible that the caller is using a brand new hash algo that is different thant he one used to
 	 * generate his last known pwHash. If so, his call simply return false, even if the pwHash is correctly 
 	 * generated from the new algorithm. This means, if hash algo has been changed on a system level,
-	 * a user must first reset his password before this API will work again. 
+	 * a user must first reset his password before this API will work again. </p>
 	 * 
 	 * @param username The account name.
 	 * @param pwHash The hashed password, may be null or empty.
@@ -78,8 +87,8 @@ public interface AccountService {
 	/**
 	 * Gets the algorithm used to hash the account password.
 	 * 
-	 * The returned value is the algorithm used in the last 'setAccountLogin()' call. If the account has no
-	 * login, then a default algorithm name will be returned. 
+	 * <p>The returned value is the algorithm used in the last 'setAccountLogin()' call. If the account has no
+	 * login, then a default algorithm name will be returned.</p> 
 	 * 
 	 * @param username The account name.
 	 * @return Algorithm name, never returns `null`.
@@ -95,7 +104,7 @@ public interface AccountService {
 	 * @param username The account name.
 	 * @return
 	 */
-	boolean removeAccount(String username);
+	void removeAccount(String username);
 	
 	
 	/**
@@ -105,7 +114,7 @@ public interface AccountService {
 	 * 
 	 * @return
 	 */
-	boolean removeAll();
+	void removeAll();
 
 	/**
 	 * Gets the number of accounts in the data store (including inactive accounts).
@@ -115,16 +124,5 @@ public interface AccountService {
 	 * @return
 	 */
 	long getCount();
-	
-	
-	
-	/**
-	 * Gets account by username.
-	 * 
-	 * @param username
-	 * 
-	 * @return An account object or null.
-	 */
-	Account getAccount(String username);
 
 }
