@@ -20,11 +20,13 @@ public class AccountTest {
 	private static final String TEST_PASS_ALGO = "indentity";
 	
 	private AccountService accountService = null;
+	private AuthorizationService authorizationService = null;
 	
 	@Before
 	public void setup() {
 		SetupUtils.setup();
 		accountService = SetupUtils.getApplicationContext().getBean(AccountService.class);
+		authorizationService = SetupUtils.getApplicationContext().getBean(AuthorizationService.class);
 	}
 	
 	@Test
@@ -53,6 +55,12 @@ public class AccountTest {
 		accountService.createAccount(TEST_USER, TEST_PASS, TEST_PASS_ALGO);
 		accountService.setAccountLogin(TEST_USER, TEST_PASS, TEST_PASS_ALGO);
 		Assert.assertEquals(true, accountService.isLoginValid(TEST_USER, TEST_PASS));
+	}
+	
+	@Test
+	public void testAuthorization() throws Exception {
+		String token = authorizationService.getToken(TEST_USER);
+		System.out.println(token);
 	}
 
 	@After

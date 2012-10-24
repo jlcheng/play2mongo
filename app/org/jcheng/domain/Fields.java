@@ -18,6 +18,7 @@ public final class Fields {
 	public static final String PASSWORD_HASH = "pw";
 	public static final String PASSWORD_HASH_ALGO = "pwalg";
 	public static final String ACTIVE = "actv";
-	
+	public static final String USER_AUTH_TOKEN = "uatkn";
 
+	public static final String LUCKY_COLOR = "lclr";
 }

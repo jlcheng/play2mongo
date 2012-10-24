@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" ng-app="myApp">
+<head>
+  <meta charset="utf-8">
+  <title>Google Phone Gallery</title>
+  <link href="/stylesheets/app.css" rel="stylesheet">
+  <link href="/stylesheets/bootstrap.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="container-fluid">
+
+    <ul class="menu">
+      <li><a href="#/login">login</a></li>
+      <li><a href="#/view1">view1</a></li>
+      <li><a href="#/view2">view2</a></li>
+    </ul>
+
+    <div ng-view></div>
+
+
+    <hr/>
+
+    <footer>
+      <p>&copy; John Cheng 2012</p>
+    </footer>
+
+  </div><!--/.fluid-container-->
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular.min.js"></script>
+  <script src="/javascripts/app.js"></script>
+  <script src="/javascripts/controllers.js"></script>
+  <script src="/javascripts/directives.js"></script>
+  <script src="/javascripts/filters.js"></script>
+  <script src="/javascripts/services.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.1/angular-resource.min.js"></script> 
+  <script src="/lib/bootstrap.min.js"></script>
+</body>
+</html>

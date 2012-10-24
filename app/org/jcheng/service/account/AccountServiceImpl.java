@@ -3,10 +3,13 @@
  */
 package org.jcheng.service.account;
 
+import java.util.Random;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.jcheng.domain.Account;
+import org.jcheng.domain.Color;
 import org.jcheng.domain.Fields;
 import org.jcheng.repository.AccountRepository;
 import org.slf4j.Logger;
@@ -23,7 +26,7 @@ import org.springframework.stereotype.Component;
  * @author jcheng
  *
  */
-@Component
+@Component("accountService")
 public class AccountServiceImpl implements AccountService {
 	
 	private final Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class); 
@@ -67,6 +70,8 @@ public class AccountServiceImpl implements AccountService {
 			newAccount.setUsername(username);
 			newAccount.setPwHash(pwHash);
 			newAccount.setPwHashAlgo(pwHashAlgo);
+			String luckyColor = Color.values()[new Random().nextInt(Color.values().length)].toString();
+			newAccount.setLuckyColor(luckyColor);
 			acct = accountRepository.save(newAccount);
 			return acct != null && acct.getId() != null;			
 		}
@@ -78,6 +83,7 @@ public class AccountServiceImpl implements AccountService {
 		Account acct = getAccount(username);
 		if ( acct != null ) {
 			acct.setActive(active);
+			accountRepository.save(acct);			
 		}
 	}
 
@@ -124,6 +130,16 @@ public class AccountServiceImpl implements AccountService {
 		return null;
 	}
 	
+
+	@Override
+	public String getLuckyColor(String username) {
+		Account acct = getAccount(username);
+		if ( acct != null ) {
+			return acct.getLuckyColor();
+		}
+		return null;
+	}
+	
 	/**
 	 * Gets an Account by username.
 	 * 
@@ -161,5 +177,6 @@ public class AccountServiceImpl implements AccountService {
 	public void setMongoTemplate(MongoTemplate mongoTemplate) {
 		this.mongoTemplate = mongoTemplate;
 	}
+
 
 }

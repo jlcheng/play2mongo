@@ -125,4 +125,11 @@ public interface AccountService {
 	 */
 	long getCount();
 
+	/**
+	 * Find out the lucky color for the specified user.
+	 * 
+	 * @param username 
+	 * @return
+	 */
+	String getLuckyColor(String username);
 }
