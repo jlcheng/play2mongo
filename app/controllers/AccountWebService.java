@@ -5,7 +5,9 @@ import global.GlobalContext;
 import org.jcheng.service.account.AccountService;
 import org.jcheng.service.account.AuthorizationService;
 
+import play.data.DynamicForm;
 import play.libs.Json;
+import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
@@ -24,16 +26,34 @@ public class AccountWebService extends Controller {
 	private static AccountService accountService = (AccountService) GlobalContext.getApplicationContext().getBean("accountService");
 	private static AuthorizationService authorizationService = (AuthorizationService) GlobalContext.getApplicationContext().getBean("authorizationService");
 	
+	@BodyParser.Of(play.mvc.BodyParser.Json.class)	
+	public static Result doCreate() {
+	    DynamicForm data = form().bindFromRequest();
+	    String username = data.get("username");
+	    String pwHash = data.get("pwHash");
+		System.err.println( username + " , " + pwHash);
+		boolean isCreated = accountService.isAccountCreated(username);
+		if ( isCreated ) {
+			return badRequest(Json.toJson(new WSResult(false, "account already exists")));
+		} else {
+			boolean created = accountService.createAccount(username, pwHash, "identity");
+			if ( created ) {
+				return ok(Json.toJson(new WSResult(true, "ok")));
+			} else {
+				return badRequest(Json.toJson(new WSResult(false, "failed")));
+			}
+		}
+	}
+	
+	
 	public static Result doLogin(String username, String pwHash) {
 		boolean isValid = accountService.isLoginValid(username, pwHash);
-		WSResult result;
 		if ( isValid ) {
 			String authToken = authorizationService.getToken(username);
-			result = new WSResult(true, authToken);
+			return ok(Json.toJson(new WSResult(true, authToken)));
 		} else {
-			result = new WSResult(false, "login failed");
+			return forbidden(Json.toJson(new WSResult(false, "login failed")));
 		}
-		return ok(Json.toJson(result));
 	}
 	
 	@With(AccountAuthAction.class)
@@ -47,5 +67,12 @@ public class AccountWebService extends Controller {
 		}
 		return ok(Json.toJson(result));
 	}
+	
+	@With(AccountAuthAction.class)
+	public static Result removeAllAccounts(String username) {
+		accountService.removeAll();
+		return ok(Json.toJson("ok"));
+	}
+	
 
 }

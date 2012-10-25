@@ -9,7 +9,7 @@
         <!-- Text input-->
         <label class="control-label" for="username">Username</label>
         <div class="controls">
-          <input name="username" ng-model="username" type="text" placeholder="" class="input-xlarge"/>
+          <input name="username" ng-model="username" type="text" value="jcheng" class="input-xlarge"/>
           <p class="help-block"></p>
         </div>
       </div>
@@ -18,17 +18,21 @@
         <!-- Text input-->
         <label class="control-label" for="password">Password</label>
         <div class="controls">
-          <input name="password" ng-model="password" type="text" placeholder="" class="input-xlarge"/>
+          <input name="password" ng-model="password" type="text" value="password" class="input-xlarge"/>
           <p class="help-block"></p>
         </div>
       </div>
       <div class="control-group">
-        <label class="control-label"></label>
         <!-- Button -->
         <div class="controls">
-          <button type="button" class="btn btn-default" ng-click="doLogin(username, password)">Login {{username}}</button>
+          <button type="button" class="btn btn-default" ng-click="doLogin(username, password)">Login</button>
+          <button type="button" class="btn btn-default" ng-click="doCreate(username, password)">Create</button>
         </div>
       </div>
+      <div class="control-group">
+        <span ng-show="loginMessage">{{loginMessage}}</span>
+      </div>
+
     </fieldset>
   </form>
 </div><!--/row-->

@@ -3,11 +3,10 @@
 # ~~~~
 
 # Home page
-#GET     /                           controllers.Application.index()
-#GET     /login                      controllers.Application.login()
-GET     /ws/v1/doLogin               controllers.AccountWebService.doLogin(username, pwHash)
-GET     /ws/v1/:username/luckyColor    controllers.AccountWebService.getLuckyColor(username)
-
+GET     /ws/v1/auth/doLogin          controllers.AccountWebService.doLogin(username, pwHash)
+POST    /ws/v1/auth/doCreate         controllers.AccountWebService.doCreate()
+GET     /ws/v1/:username/luckyColor  controllers.AccountWebService.getLuckyColor(username)
+PUT     /ws/v1/:username/removeAll   controllers.AccountWebService.removeAllAccounts(username)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /*file               controllers.Assets.at(path="/public", file)

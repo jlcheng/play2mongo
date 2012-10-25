@@ -49,7 +49,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 		if ( acct != null ) {
 			return token != null && token.equals(acct.getAuthorizationToken());
 		}
-		return true;
+		return false;
 	}
 
 	/**

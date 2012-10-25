@@ -13,5 +13,7 @@ public interface AccountRepository extends CrudRepository<Account, Serializable>
     List<Account> findByUsernameAndActive(String username, boolean isActive);
     
     Account findOneByUsername(String username);
+    
+    Account findOneByAuthorizationToken(String authorizationToken);
 
 }

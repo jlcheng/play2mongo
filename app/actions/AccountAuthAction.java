@@ -2,7 +2,8 @@ package actions;
 
 import global.GlobalContext;
 
-import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jcheng.domain.Account;
 import org.jcheng.repository.AccountRepository;
@@ -20,7 +21,8 @@ import play.mvc.Result;
 public class AccountAuthAction extends Simple {
 	
 	private AuthorizationService authorizationService = (AuthorizationService) GlobalContext.getApplicationContext().getBean("authorizationService");
-	private AccountRepository accountRepository = (AccountRepository) GlobalContext.getApplicationContext().getBean("accountRepository");	
+	private AccountRepository accountRepository = (AccountRepository) GlobalContext.getApplicationContext().getBean("accountRepository");
+	private static final Pattern ACCT_SERVICE_REGEX = Pattern.compile("^/ws/.+?/(.+?)/.+$");
 	
 	/* (non-Javadoc)
 	 * @see play.mvc.Action#call(play.mvc.Http.Context)
@@ -29,12 +31,15 @@ public class AccountAuthAction extends Simple {
 	public Result call(Context ctx) throws Throwable {
 		String path = ctx.request().path();
 		String authToken = "";
-		if ( ctx.request().queryString().get("atkn") != null ) {
-			 authToken = Arrays.asList(ctx.request().queryString().get("atkn")).get(0);
+		if ( ctx.request().cookies() != null
+				&& ctx.request().cookies().get("authToken") != null ) {
+			 authToken = ctx.request().cookies().get("authToken").value(); 
 		}
+		
 		String username = "";
-		if ( ctx.request().queryString().get("username") != null ) {
-			 username = ctx.request().queryString().get("username")[0];
+		Matcher m = ACCT_SERVICE_REGEX.matcher(path);
+		if ( m.matches() ) {
+			username = m.group(1);
 		}
 		
 		Logger.debug("path: " + path);

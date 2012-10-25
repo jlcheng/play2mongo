@@ -10,6 +10,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
 http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd">
 
+  <context:component-scan base-package="org.jcheng.service, org.jcheng.repository" />
+
   <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="location">
       <value>classpath:accountService.properties</value>
@@ -21,8 +23,8 @@ http://www.springframework.org/schema/data/mongo http://www.springframework.org/
   <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
     <constructor-arg ref="mongo" />
     <constructor-arg value="play2mongo" />
+    <property name="writeConcernResolver" ref="appWriteConcernResolver"/>
   </bean>
 
-  <context:component-scan base-package="org.jcheng.service" />
   <mongo:repositories base-package="org.jcheng.repository" />
 </beans>
