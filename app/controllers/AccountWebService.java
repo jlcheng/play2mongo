@@ -28,7 +28,7 @@ public class AccountWebService extends Controller {
 	
 	@BodyParser.Of(play.mvc.BodyParser.Json.class)	
 	public static Result doCreate() {
-	    DynamicForm data = form().bindFromRequest();
+	    DynamicForm data = new DynamicForm().bindFromRequest();
 	    String username = data.get("username");
 	    String pwHash = data.get("pwHash");
 		System.err.println( username + " , " + pwHash);

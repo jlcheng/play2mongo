@@ -6,7 +6,7 @@ A Playframework Project with a MongoDB theme.
 ========================
 There are some preparation work that needs to be done before you fire up this app.
 
-1. Download and install Play (duh).
+1. Download and install Play 2.1.
 2. Download and install MongoDB. How to do this is beyond the scope of this project. 
 But you'll want MongoDB running on your localhost using the default port of 27017. You can edit the hostname in 
 `conf/accountService.properties`.
